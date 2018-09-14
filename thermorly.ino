@@ -5,7 +5,7 @@
 #define DHTPIN            39         // Pin which is connected to the DHT sensor.
 #include <DHT.h>
 #include <DHT_U.h>
-#include <Adafruit_Sensor.h>
+//#include <Adafruit_Sensor.h> future connection afh readings
 
 int pinDHT22 = 39; //digital pin 39
 DHT_Unified dht(DHTPIN, DHTTYPE);
@@ -57,7 +57,8 @@ void loop() {
     Serial.print(event.temperature);
     Serial.println(" *C");
   }
-
+return();  {
+}
 // AC on off with fan as rly2 and AC as rly1 need to add AC switch settings 
 if ((event.temperature) >= 23.8){
   Serial.print("AC ON");
@@ -65,9 +66,9 @@ if ((event.temperature) >= 23.8){
   digitalWrite(RLY2,LOW);
   digitalWrite(RLY3,LOW);
   delay(30000);//set to 30000(30sec)
-  digitalWrite(RLY1,HIGH);
-  digitalWrite(RLY2,HIGH);
-  digitalWrite(RLY3,LOW);
+  digitalWrite(RLY1,HIGH);// need to keep the ac and fan going only untill the temp reaches spec. and then turn off ac and run fan for 
+  digitalWrite(RLY2,HIGH);// 30 seconds. and continue to quietly read temp till it reaches out of spec
+  digitalWrite(RLY3,LOW);//
 }
 else{
   ((event.temperature) <= 22.00);
@@ -76,7 +77,9 @@ else{
   digitalWrite(RLY2,LOW);
   digitalWrite(RLY3,LOW);
   delay(20000);
+  return("(event.temperature)");  //not sure if this works yet 
 }
+  
 }
 //heater function still needs work need to add heat switch setting 
 //if((event.temperature) <= 23.8){
