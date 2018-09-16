@@ -5,7 +5,7 @@
 #define DHTPIN            39         // Pin which is connected to the DHT sensor.
 #include <DHT.h>
 #include <DHT_U.h>
-#include <Adafruit_Sensor.h>
+//#include <Adafruit_Sensor.h>  eventually send output to adafruit.io
 
 int pinDHT22 = 39; //digital pin 39
 DHT_Unified dht(DHTPIN, DHTTYPE);
@@ -13,14 +13,14 @@ uint32_t delayMS;
 
 void setup() {
   // put your setup code here, to run once:
- Serial.begin(115200); 
+  Serial.begin(115200);
   // Initialize device.
   dht.begin();
   Serial.println("thermostat");
   // Print temperature sensor details.
   sensor_t sensor;
 
-dht.temperature().getSensor(&sensor);
+  dht.temperature().getSensor(&sensor);
   Serial.println("------------------------------------");
   Serial.println("Temperature");
   Serial.print  ("Sensor:       "); Serial.println(sensor.name);
@@ -28,26 +28,26 @@ dht.temperature().getSensor(&sensor);
   Serial.print  ("Unique ID:    "); Serial.println(sensor.sensor_id);
   Serial.print  ("Max Value:    "); Serial.print(sensor.max_value); Serial.println(" *C");
   Serial.print  ("Min Value:    "); Serial.print(sensor.min_value); Serial.println(" *C");
-  Serial.print  ("Resolution:   "); Serial.print(sensor.resolution); Serial.println(" *C"); 
+  Serial.print  ("Resolution:   "); Serial.print(sensor.resolution); Serial.println(" *C");
 
- 
- Serial.print("temperature"); Serial.print(" *C, ");
-//Serial.print((float)humidity); Serial.println(" RH%");
-  
+
+  Serial.print("temperature"); Serial.print(" *C, ");
+  //Serial.print((float)humidity); Serial.println(" RH%");
+
   // DHT22 sampling rate is 0.5HZ.
   delayMS = sensor.min_delay / 1000;
 
-pinMode(RLY1, OUTPUT);
-pinMode(RLY2, OUTPUT);
-pinMode(RLY3, OUTPUT);
-digitalWrite(RLY1,LOW);
-digitalWrite(RLY2,LOW);
-digitalWrite(RLY3,LOW);
+  pinMode(RLY1, OUTPUT);
+  pinMode(RLY2, OUTPUT);
+  pinMode(RLY3, OUTPUT);
+  digitalWrite(RLY1, LOW);
+  digitalWrite(RLY2, LOW);
+  digitalWrite(RLY3, LOW);
 }
 void loop() {
   delay(delayMS);
   // Get temperature event and print its value.
-  sensors_event_t event;  
+  sensors_event_t event;
   dht.temperature().getEvent(&event);
   if (isnan(event.temperature)) {
     Serial.println("Error reading temperature!");
@@ -57,38 +57,46 @@ void loop() {
     Serial.print(event.temperature);
     Serial.println(" *C");
   }
+  {
+    // AC on off with fan as rly2 and AC as rly1 need to add AC switch settings
+    if ((event.temperature) >= 23.8) {
+      Serial.println(" AC ON ");
+      digitalWrite(RLY1, HIGH);
+      digitalWrite(RLY2, LOW);
+      //digitalWrite(RLY3,LOW);
+      delay(30000);//set to 30000(30sec)
+    while((event.temperature) >= 23.8)
+      {
+        digitalWrite(RLY1, LOW); //needs to stay on until the temp reaches under 22.00
+      
+      digitalWrite(RLY2, LOW);  //sorry dont code in c++ but yeah...   //digitalWrite(RLY3,LOW);
+    }
+    }
+    else ((event.temperature) <= 22.00); {
+      //((event.temperature) >= 22.00);
 
-// AC on off with fan as rly2 and AC as rly1 need to add AC switch settings 
-if ((event.temperature) >= 23.8){
-  Serial.print("AC ON");
-  digitalWrite(RLY1,HIGH);
-  digitalWrite(RLY2,LOW);
-  digitalWrite(RLY3,LOW);
-  delay(30000);//set to 30000(30sec)
-  digitalWrite(RLY1,HIGH);
-  digitalWrite(RLY2,HIGH);
-  digitalWrite(RLY3,LOW);
-}
-else{
-  ((event.temperature) <= 22.00);
-  Serial.print("AC OFF"); 
-  digitalWrite(RLY1,LOW);
-  digitalWrite(RLY2,LOW);
-  digitalWrite(RLY3,LOW);
-  delay(20000);
-}
-}
-//heater function still needs work need to add heat switch setting 
+      digitalWrite(RLY1, HIGH);
+      digitalWrite(RLY2, HIGH);
+      Serial.print("AC OFF"); //digitalWrite(RLY3,LOW);
+      delay(20000);
+    }
+    return (digitalWrite); {
+      digitalWrite(RLY1, HIGH); //add a 30sec fan on delay and keep delay from repeating each
+      digitalWrite(RLY2, HIGH);
+    }
+  }
+}                           //temp check in loop.
+//heater function still needs work need to add heat switch setting
 //if((event.temperature) <= 23.8){
-  //digitalWrite(RLY1,LOW);
- // digitalWrite(RLY2,HIGH);
- // digitalWrite(RLY3,LOW);
- // delay(1000);
- // Serial.print("heat on");
+//digitalWrite(RLY1,LOW);
+// digitalWrite(RLY2,HIGH);
+// digitalWrite(RLY3,LOW);
+// delay(1000);
+// Serial.print("heat on");
 //}
 //else {
- // digitalWrite(RLY1,LOW);
- // digitalWrite(RLY2,LOW);
- // digitalWrite(RLY3,LOW);  
+// digitalWrite(RLY1,LOW);
+// digitalWrite(RLY2,LOW);
+// digitalWrite(RLY3,LOW);
 //}
 //}
